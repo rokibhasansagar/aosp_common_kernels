@@ -1,0 +1,46 @@
+env:
+  global:
+    - baseRepo="https://android.googlesource.com/kernel/common.git"
+    - originRepo="https://github.com/rokibhasansagar/aosp_common_kernels.git"
+    - originRepoSlug="rokibhasansagar/aosp_common_kernels"
+  matrix:
+    - branch="android-3.18"
+    - branch="android-4.4"
+    - branch="android-4.9"
+    - branch="android-4.14"
+    - branch="android-4.19"
+    - branch="upstream-linux-3.18.y"
+    - branch="upstream-linux-4.4.y"
+    - branch="upstream-linux-4.9.y"
+    - branch="upstream-linux-4.14.y"
+    - branch="upstream-linux-4.19.y"
+os: linux
+dist: xenial
+sudo: required
+git:
+  depth: 2
+addons:
+  apt:
+    update:
+    - true
+install: true
+script:
+  - "travis_wait 30 sleep 1800 &"
+  - git config --global user.email ${GitHubMail}
+  - git config --global user.name ${GitHubName}
+  - git config --global color.ui true
+  - git clone --progress ${baseRepo} -b ${branch} --single-branch ${branch}/
+  - cd ${branch}/
+  - git remote set-url origin ${originRepo}
+  - git branch --track -f master
+  - git push --force https://${GitOAUTHToken}@github.com/${originRepoSlug}.git HEAD:${branch}
+  - cd -
+  - rm -rf ${branch}
+  - sleep 10
+branches:
+  only:
+  - master
+notifications:
+  email:
+    on_success: never
+    on_failure: always
