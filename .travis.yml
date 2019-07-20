@@ -29,11 +29,12 @@ script:
   - git config --global user.email ${GitHubMail}
   - git config --global user.name ${GitHubName}
   - git config --global color.ui true
-  - git clone --progress ${baseRepo} -b ${branch} --single-branch ${branch}/
+  - git clone --progress ${originRepo} -b ${branch} --single-branch ${branch}/
   - cd ${branch}/
-  - git remote set-url origin ${originRepo}
-  - git branch --track -f master
-  - git push --force https://${GitOAUTHToken}@github.com/${originRepoSlug}.git HEAD:${branch}
+  - git remote add upstream ${baseRepo}
+  - git pull upstream ${branch} --force --progress --ff --no-edit --no-commit --allow-unrelated-histories || echo -e "Can't pull -or- Tree is already up2date"
+  - git branch --track -f master || echo -e "Already tracking master branch"
+  - git push --force https://${GitOAUTHToken}@github.com/${originRepoSlug}.git HEAD:${branch} || echo -e "Force Failed!"
   - cd -
   - rm -rf ${branch}
   - sleep 10
