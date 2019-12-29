@@ -35,6 +35,7 @@ script:
     echo -en "The last commit SHA of self repo is - " && echo ${oldsha}
     newsha=$(git ls-remote ${UpstreamRepo} "refs/heads/${branch}" | cut -f1)
     echo -en "The last commit SHA of Upstream repo is - " && echo ${newsha}
+  - |
     if [ ${oldsha} == ${newsha} ]; then
       echo "Tree is up-to-date. No need to pull"
       exit 0
@@ -50,8 +51,8 @@ script:
       git push --force https://${GitOAUTHToken}@github.com/${originRepoSlug}.git HEAD:${branch} || exit 1
       cd -
       rm -rf ${branch}
+      echo "Operation Complete!"
     fi
-  - echo "Operation Complete!"
 branches:
   only:
   - master
