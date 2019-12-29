@@ -1,6 +1,6 @@
 env:
   global:
-    - baseRepo="https://android.googlesource.com/kernel/common.git"
+    - UpstreamRepo="https://android.googlesource.com/kernel/common.git"
     - originRepo="https://github.com/rokibhasansagar/aosp_common_kernels.git"
     - originRepoSlug="rokibhasansagar/aosp_common_kernels"
   matrix:
@@ -18,7 +18,7 @@ os: linux
 dist: xenial
 sudo: required
 git:
-  depth: 2
+  depth: 1
 addons:
   apt:
     update:
@@ -26,18 +26,32 @@ addons:
 install: true
 script:
   - "travis_wait 30 sleep 1800 &"
-  - git config --global user.email ${GitHubMail}
-  - git config --global user.name ${GitHubName}
-  - git config --global color.ui true
-  - git clone --progress ${originRepo} -b ${branch} --single-branch ${branch}/
-  - cd ${branch}/
-  - git remote add upstream ${baseRepo}
-  - git pull upstream ${branch} --force --progress --ff --no-edit --no-commit --allow-unrelated-histories || echo -e "Can't pull -or- Tree is already up2date"
-  - git branch --track -f master || echo -e "Already tracking master branch"
-  - git push --force https://${GitOAUTHToken}@github.com/${originRepoSlug}.git HEAD:${branch} || echo -e "Force Failed!"
-  - cd -
-  - rm -rf ${branch}
-  - sleep 10
+  - |
+    git config --global user.email ${GitHubMail}
+    git config --global user.name ${GitHubName}
+    git config --global color.ui true
+  - |
+    oldsha=$(git ls-remote ${originRepo} ${branch} | cut -f1)
+    echo -en "The last commit SHA of self repo is - " && echo ${oldsha}
+    newsha=$(git ls-remote ${UpstreamRepo} ${branch} | cut -f1)
+    echo -en "The last commit SHA of Upstream repo is - " && echo ${newsha}
+    if [ ${oldsha} == ${newsha} ]; then
+      echo "Tree is up-to-date. No need to pull"
+      exit 0
+    elif [ ${oldsha} != ${newsha} ]; then
+      echo "Tree is not up-to-date. So, need to update"
+      git clone --progress ${originRepo} -b ${branch} --single-branch ${branch}/
+      cd ${branch}/
+      git remote add upstream ${UpstreamRepo}
+      echo "Pulling latest changes into own"
+      git pull upstream ${branch} --force --progress --ff --no-edit --no-commit --allow-unrelated-histories || exit 1
+      git branch --track -f master
+      echo "Pushing into GitHub now"
+      git push --force https://${GitOAUTHToken}@github.com/${originRepoSlug}.git HEAD:${branch} || exit 1
+      cd -
+      rm -rf ${branch}
+    fi
+  - echo "Operation Complete!"
 branches:
   only:
   - master
