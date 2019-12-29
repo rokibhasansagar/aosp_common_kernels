@@ -31,9 +31,9 @@ script:
     git config --global user.name ${GitHubName}
     git config --global color.ui true
   - |
-    oldsha=$(git ls-remote ${originRepo} ${branch} | cut -f1)
+    oldsha=$(git ls-remote ${originRepo} "refs/heads/${branch}" | cut -f1)
     echo -en "The last commit SHA of self repo is - " && echo ${oldsha}
-    newsha=$(git ls-remote ${UpstreamRepo} ${branch} | cut -f1)
+    newsha=$(git ls-remote ${UpstreamRepo} "refs/heads/${branch}" | cut -f1)
     echo -en "The last commit SHA of Upstream repo is - " && echo ${newsha}
     if [ ${oldsha} == ${newsha} ]; then
       echo "Tree is up-to-date. No need to pull"
