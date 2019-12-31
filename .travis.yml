@@ -49,6 +49,8 @@ script:
       git branch --track -f master
       echo "Pushing into GitHub now"
       git push --force https://${GitOAUTHToken}@github.com/${originRepoSlug}.git HEAD:${branch} || exit 1
+      echo "The new changes added are -- "
+      git log --oneline ${oldsha}..${newsha}
       cd -
       rm -rf ${branch}
       echo "Operation Complete!"
