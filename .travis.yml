@@ -1,3 +1,6 @@
+os: linux
+dist: bionic
+language: generic
 env:
   global:
     - UpstreamRepo="https://android.googlesource.com/kernel/common.git"
@@ -14,9 +17,6 @@ env:
     - branch="upstream-linux-4.9.y"
     - branch="upstream-linux-4.14.y"
     - branch="upstream-linux-4.19.y"
-os: linux
-dist: xenial
-sudo: required
 git:
   depth: 1
 addons:
